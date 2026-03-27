@@ -4,11 +4,19 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 import io
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # allow all (for development)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Load the model
-MODEL_PATH = "../Models/1"
+MODEL_PATH = "../Models/4"
 loaded_model = None
 infer = None
 use_keras_model = False
@@ -48,6 +56,7 @@ async def predict(file: UploadFile = File(...)):
             return {"error": "Empty file"}
 
         image = Image.open(io.BytesIO(image_data))
+        image = image.convert("RGB")   # 🔥 IMPORTANT FIX
         print("Image opened successfully")
 
         image = image.resize((256, 256))
@@ -79,4 +88,4 @@ async def predict(file: UploadFile = File(...)):
         return {"error": str(e)}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host='localhost', port=8000)
+    uvicorn.run(app, host='localhost', port=8001)
